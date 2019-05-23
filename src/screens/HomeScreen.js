@@ -24,10 +24,12 @@ function HomeScreen() {
       <Statistic
         label="Total Cash:"
         value={totalCash}
-        style={{ marginTop: 20 }}
+        style={{ marginTop: !budgets.length ? 0 : 20 }}
       />
       <Statistic label="Total Expenses:" value={-totalExpenses} />
-      <Statistic label="Saving:" value={cash.amount - totalExpenses} />
+      {cash && (
+        <Statistic label="Saving:" value={cash.amount - totalExpenses} />
+      )}
     </View>
   );
 }

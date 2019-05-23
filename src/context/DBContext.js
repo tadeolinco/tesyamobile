@@ -4,7 +4,6 @@ import Vasern from 'vasern';
 import BudgetModel from '../models/Budget';
 import CashModel from '../models/Cash';
 import TransactionModel from '../models/Transaction';
-// import dropDatabase from '../utils/dropDatabase';
 
 export const DBContext = React.createContext(null);
 
@@ -92,7 +91,51 @@ export function DBProvider({ children }) {
       });
     });
 
+    Cash.onChange(({ event, changed }) => {
+      if (event === 'update') {
+        const dbCash = changed[0];
+
+        let computedTotalCash = dbCash ? dbCash.amount : 0;
+
+        const budgets = [...Budget.data()];
+        for (const budget of budgets) {
+          const multiplier =
+            budget.frequency === 'D' ? differenceInDays : differenceInMonths;
+          let extra =
+            (multiplier(new Date(), new Date(budget.createdAt)) + 1) *
+            budget.allocated;
+
+          Transaction.filter({
+            budget_id: budget.id,
+          })
+            .data()
+            .forEach(transaction => {
+              computedTotalCash -= transaction.amount;
+              extra -= transaction.amount;
+            });
+          budget.extra = extra;
+        }
+        setTotalCash(computedTotalCash);
+      }
+    });
+
     Budget.onChange(({ event, changed }) => {
+      if (event === 'remove') {
+        const budget = changed[0];
+
+        let computedTotalCash = totalCash;
+        Transaction.filter({ budget_id: budget.id })
+          .data()
+          .forEach(transaction => {
+            computedTotalCash += transaction.amount;
+          });
+
+        Transaction.remove({ budget_id: budget.id });
+
+        setTotalCash(computedTotalCash);
+        setBudgets(budgets => budgets.filter(b => b.id !== budget.id));
+      }
+
       if (event === 'update') {
         let computedTotalCash = totalCash;
         const budget = changed[0];

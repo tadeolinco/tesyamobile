@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Button, StyleSheet, ToastAndroid, View } from 'react-native';
+import { Alert, Button, StyleSheet, ToastAndroid, View } from 'react-native';
 import FormItem, { FORM_ITEM_TYPE } from '../components/FormItem';
 import { RouterContext } from '../components/Router';
 import DBContext from '../context/DBContext';
@@ -25,9 +25,25 @@ function BudgetScreen() {
       ToastAndroid.show('Budget updated', ToastAndroid.SHORT);
       changePage('/');
     } catch (err) {
-      console.log(err);
       ToastAndroid.show(err.message, ToastAndroid.SHORT);
     }
+  }
+
+  function removeBudget() {
+    Alert.alert('Are you sure you want to delete?', '', [
+      {
+        text: 'OK',
+        onPress: () => {
+          try {
+            db.Budget.remove(budget.id);
+            ToastAndroid.show('Budget removed', ToastAndroid.SHORT);
+            changePage('/');
+          } catch (err) {
+            ToastAndroid.show(err.message, ToastAndroid.SHORT);
+          }
+        },
+      },
+    ]);
   }
 
   return (
@@ -57,7 +73,20 @@ function BudgetScreen() {
       </View>
 
       <View style={[styles.buttonContainer]}>
-        <Button title="EDIT BUDGET" onPress={updateBudget} />
+        <View style={{ flex: 1, marginRight: 10 }}>
+          <Button
+            style={{ flex: 1, marginRight: 10 }}
+            title="REMOVE BUDGET"
+            onPress={removeBudget}
+          />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Button
+            style={{ flex: 1, marginRight: 10 }}
+            title="EDIT BUDGET"
+            onPress={updateBudget}
+          />
+        </View>
       </View>
     </View>
   );
@@ -73,6 +102,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   buttonContainer: {
+    flexDirection: 'row',
     margin: 10,
   },
 });
