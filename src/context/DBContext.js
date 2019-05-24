@@ -36,7 +36,7 @@ export function DBProvider({ children }) {
           if (!dbCash) {
             dbCash = Cash.insert({
               amount: 0,
-            });
+            })[0];
           }
           setCash(dbCash);
           setDB(vasern);
@@ -45,6 +45,7 @@ export function DBProvider({ children }) {
     });
 
     Budget.onChange(({ event, changed }) => {
+      const budget = changed ? changed[0] : {};
       if (event === 'insert') {
         setBudgets(budgets => [...budgets, budget]);
       } else if (event === 'update') {
