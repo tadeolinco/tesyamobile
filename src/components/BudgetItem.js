@@ -66,11 +66,11 @@ function BudgetItem(budget) {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    borderBottomColor: 'black',
-    borderBottomWidth: StyleSheet.hairlineWidth,
+    // borderBottomColor: 'black',
+    // borderBottomWidth: StyleSheet.hairlineWidth,
   },
   cell: {
-    padding: 10,
+    padding: 5,
     flex: 4,
   },
   nameCell: {

@@ -10,12 +10,25 @@ function CashScreen() {
   const { changePage } = useContext(RouterContext);
   const [values, onChange] = useForm({
     amount: String(cash.amount),
+    addAmount: '',
   });
 
   function updateCash() {
     try {
       db.Cash.update(cash.id, {
         amount: +values.amount,
+      });
+      ToastAndroid.show('Cash updated', ToastAndroid.SHORT);
+      changePage('/');
+    } catch (err) {
+      ToastAndroid.show(err.message, ToastAndroid.SHORT);
+    }
+  }
+
+  function addToCash() {
+    try {
+      db.Cash.update(cash.id, {
+        amount: cash.amount + +values.addAmount,
       });
       ToastAndroid.show('Cash updated', ToastAndroid.SHORT);
       changePage('/');
@@ -37,6 +50,18 @@ function CashScreen() {
 
       <View style={[styles.buttonContainer]}>
         <Button title="UPDATE CASH" onPress={updateCash} />
+      </View>
+      <View style={[styles.formItemsContainer]}>
+        <FormItem
+          type={FORM_ITEM_TYPE.NUMBER}
+          label="Add to Cash"
+          value={values.addAmount}
+          onChange={onChange.addAmount}
+        />
+      </View>
+
+      <View style={[styles.buttonContainer]}>
+        <Button title="ADD TO CASH" onPress={addToCash} />
       </View>
     </View>
   );

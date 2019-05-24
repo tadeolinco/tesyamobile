@@ -4,7 +4,7 @@ import { STYLES } from '../global-styles';
 import coloredNumber from '../utils/coloredNumber';
 import commafy from '../utils/commafy';
 
-function Statistic({ label, value, style }) {
+function Statistic({ label, value, extra, style }) {
   return (
     <View style={[styles.statisticContainer, style]}>
       <View style={[styles.statisticCell]}>
@@ -14,6 +14,7 @@ function Statistic({ label, value, style }) {
         <Text style={[styles.statistic, coloredNumber(value)]}>
           {value > 0 && '+'}
           {commafy(value)}
+          {extra && ` (${extra})`}
         </Text>
       </View>
     </View>
@@ -23,11 +24,11 @@ function Statistic({ label, value, style }) {
 const styles = StyleSheet.create({
   statisticContainer: {
     flexDirection: 'row',
-    borderBottomColor: 'black',
-    borderBottomWidth: StyleSheet.hairlineWidth,
+    // borderBottomColor: 'black',
+    // borderBottomWidth: StyleSheet.hairlineWidth,
   },
   statisticCell: {
-    padding: 10,
+    padding: 5,
     flex: 1,
   },
   statisticText: {

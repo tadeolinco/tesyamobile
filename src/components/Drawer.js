@@ -51,21 +51,12 @@ function Drawer({ position, children }) {
             </TouchableOpacity>
             <TouchableOpacity
               activeOpacity={0.95}
-              style={[styles.drawerButton, { backgroundColor: '#7ace68' }]}
+              style={[styles.drawerButton, { backgroundColor: '#5e9bea' }]}
               onPress={() => {
                 handleChangePage('/add-budget');
               }}
             >
               <Text style={[styles.drawerButtonText]}>ADD BUDGET</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              activeOpacity={0.95}
-              style={[styles.drawerButton, { backgroundColor: '#b3b3b3' }]}
-              onPress={() => {
-                handleChangePage('/add-transaction');
-              }}
-            >
-              <Text style={[styles.drawerButtonText]}>ADD TRANSACTION</Text>
             </TouchableOpacity>
             <TouchableOpacity
               activeOpacity={0.95}

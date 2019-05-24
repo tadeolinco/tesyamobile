@@ -5,7 +5,13 @@ import Statistic from '../components/Statistic';
 import DBContext from '../context/DBContext';
 
 function HomeScreen() {
-  const { budgets, totalExpenses, totalCash, cash } = useContext(DBContext);
+  const {
+    budgets,
+    cash,
+    budgetsMeta,
+    estimateExpenses,
+    totalExpenses,
+  } = useContext(DBContext);
 
   return (
     <View>
@@ -18,18 +24,18 @@ function HomeScreen() {
           return a.name > b.name ? -1 : a.name < b.name ? 1 : 0;
         })
         .map(budget => (
-          <BudgetItem key={budget.id} {...budget} />
+          <BudgetItem key={budget.id} {...budget} {...budgetsMeta[budget.id]} />
         ))}
 
-      <Statistic
-        label="Total Cash:"
-        value={totalCash}
-        style={{ marginTop: !budgets.length ? 0 : 20 }}
-      />
-      <Statistic label="Total Expenses:" value={-totalExpenses} />
       {cash && (
-        <Statistic label="Saving:" value={cash.amount - totalExpenses} />
+        <Statistic
+          label="Total Cash:"
+          value={cash.amount}
+          style={{ marginTop: !budgets.length ? 0 : 20 }}
+        />
       )}
+      <Statistic label="Estimate Expenses:" value={estimateExpenses} />
+      <Statistic label={`Total Expenses:`} value={totalExpenses} />
     </View>
   );
 }

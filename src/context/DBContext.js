@@ -1,5 +1,10 @@
-import { differenceInDays, differenceInMonths, getDaysInMonth } from 'date-fns';
-import React, { useEffect, useState } from 'react';
+import {
+  differenceInDays,
+  differenceInMonths,
+  getDaysInMonth,
+  isThisMonth,
+} from 'date-fns';
+import React, { useEffect, useMemo, useState } from 'react';
 import Vasern from 'vasern';
 import BudgetModel from '../models/Budget';
 import CashModel from '../models/Cash';
@@ -12,20 +17,7 @@ export function DBProvider({ children }) {
 
   const [budgets, setBudgets] = useState([]);
   const [cash, setCash] = useState(null);
-  const [totalCash, setTotalCash] = useState(0);
-  const [totalExpenses, setTotalExpenses] = useState(0);
-
-  useEffect(() => {
-    let newTotalExpenses = 0;
-    for (const budget of budgets) {
-      if (budget.frequency === 'D') {
-        newTotalExpenses += getDaysInMonth(new Date()) * budget.allocated;
-      } else {
-        newTotalExpenses += budget.allocated;
-      }
-    }
-    setTotalExpenses(newTotalExpenses);
-  }, [budgets]);
+  const [transactions, setTransactions] = useState([]);
 
   useEffect(() => {
     const vasern = new Vasern({
@@ -35,172 +27,124 @@ export function DBProvider({ children }) {
 
     const { Budget, Transaction, Cash } = vasern;
 
-    Cash.onLoaded(() => {
-      const dbCash = Cash.data()[0];
-      if (!dbCash) {
-        Cash.insert({
-          amount: 0,
-        });
-      } else {
-        setCash(dbCash);
-      }
-    });
-
-    Cash.onChange(({ event, changed }) => {
-      if (['insert', 'update'].includes(event)) {
-        setCash(changed[0]);
-      }
-    });
-
     Budget.onLoaded(() => {
       Transaction.onLoaded(() => {
         Cash.onLoaded(() => {
+          setBudgets(Budget.data());
+          setTransactions(Transaction.data());
+          let dbCash = Cash.data()[0];
+          if (!dbCash) {
+            dbCash = Cash.insert({
+              amount: 0,
+            });
+          }
+          setCash(dbCash);
           setDB(vasern);
         });
       });
     });
 
-    Budget.onLoaded(() => {
-      Transaction.onLoaded(() => {
-        Cash.onLoaded(() => {
-          const dbCash = Cash.data()[0];
-
-          let computedTotalCash = dbCash ? dbCash.amount : 0;
-
-          const budgets = [...Budget.data()];
-          for (const budget of budgets) {
-            const multiplier =
-              budget.frequency === 'D' ? differenceInDays : differenceInMonths;
-            let extra =
-              (multiplier(new Date(), new Date(budget.createdAt)) + 1) *
-              budget.allocated;
-
-            Transaction.filter({
-              budget_id: budget.id,
-            })
-              .data()
-              .forEach(transaction => {
-                computedTotalCash -= transaction.amount;
-                extra -= transaction.amount;
-              });
-            budget.extra = extra;
-          }
-          setTotalCash(computedTotalCash);
-          setBudgets(budgets);
-        });
-      });
-    });
-
-    Cash.onChange(({ event, changed }) => {
-      if (event === 'update') {
-        const dbCash = changed[0];
-
-        let computedTotalCash = dbCash ? dbCash.amount : 0;
-
-        const budgets = [...Budget.data()];
-        for (const budget of budgets) {
-          const multiplier =
-            budget.frequency === 'D' ? differenceInDays : differenceInMonths;
-          let extra =
-            (multiplier(new Date(), new Date(budget.createdAt)) + 1) *
-            budget.allocated;
-
-          Transaction.filter({
-            budget_id: budget.id,
-          })
-            .data()
-            .forEach(transaction => {
-              computedTotalCash -= transaction.amount;
-              extra -= transaction.amount;
-            });
-          budget.extra = extra;
-        }
-        setTotalCash(computedTotalCash);
-      }
-    });
-
     Budget.onChange(({ event, changed }) => {
-      if (event === 'remove') {
-        const budget = changed[0];
-
-        let computedTotalCash = totalCash;
-        Transaction.filter({ budget_id: budget.id })
-          .data()
-          .forEach(transaction => {
-            computedTotalCash += transaction.amount;
-          });
-
-        Transaction.remove({ budget_id: budget.id });
-
-        setTotalCash(computedTotalCash);
-        setBudgets(budgets => budgets.filter(b => b.id !== budget.id));
-      }
-
-      if (event === 'update') {
-        let computedTotalCash = totalCash;
-        const budget = changed[0];
-        const multiplier =
-          budget.frequency === 'D' ? differenceInDays : differenceInMonths;
-        let extra =
-          (multiplier(new Date(), new Date(budget.createdAt)) + 1) *
-          budget.allocated;
-
-        Transaction.filter({
-          budget_id: budget.id,
-        })
-          .data()
-          .forEach(transaction => {
-            computedTotalCash -= transaction.amount;
-            extra -= transaction.amount;
-          });
-        budget.extra = extra;
-
-        setTotalCash(computedTotalCash);
+      if (event === 'insert') {
+        setBudgets(budgets => [...budgets, budget]);
+      } else if (event === 'update') {
         setBudgets(budgets =>
-          budgets.map(el => (el.id === budget.id ? budget : el))
+          budgets.map(b => (b.id === budget.id ? budget : b))
+        );
+      } else if (event === 'remove') {
+        setBudgets(budget => budgets.filter(b => b.id !== budget.id));
+      }
+    });
+
+    Transaction.onChange(({ event, changed }) => {
+      const transaction = changed ? changed[0] : {};
+      if (event === 'insert') {
+        setTransactions(transactions => [...transactions, transaction]);
+      } else if (event === 'update') {
+        setTransactions(transactions =>
+          transactions.map(t => (t.id === transaction.id ? transaction : t))
+        );
+      } else if (event === 'remove') {
+        setTransactions(transactions =>
+          transactions.filter(t => t.id !== transaction.id)
         );
       }
     });
 
-    Budget.onInsert(({ changed }) => {
-      const budget = changed[0];
+    Cash.onChange(({ event, changed }) => {
+      const cash = changed ? changed[0] : {};
+      if (event === 'update') {
+        setCash(cash);
+      }
+    });
+  }, []);
+
+  const budgetsMeta = useMemo(() => {
+    const budgetsMeta = {};
+
+    for (const budget of budgets) {
       const multiplier =
         budget.frequency === 'D' ? differenceInDays : differenceInMonths;
       const extra =
         (multiplier(new Date(), new Date(budget.createdAt)) + 1) *
         budget.allocated;
-      setBudgets(budgets => [...budgets, { ...budget, extra }]);
-    });
 
-    Transaction.onInsert(({ changed }) => {
-      const transaction = changed[0];
+      budgetsMeta[budget.id] = {
+        transactions: [],
+        budget,
+        extra,
+      };
+    }
 
-      setTotalCash(totalCash => totalCash - transaction.amount);
-      setBudgets(budgets =>
-        budgets.map(budget =>
-          budget.id === transaction.budget
-            ? { ...budget, extra: budget.extra - transaction.amount }
-            : budget
-        )
-      );
-    });
+    for (const transaction of transactions) {
+      const id = transaction.budget_id || transaction.budget;
 
-    Transaction.onRemove(({ changed }) => {
-      const transaction = changed[0];
+      budgetsMeta[id].transactions.push(transaction);
+      budgetsMeta[id].extra -= transaction.amount;
+    }
 
-      setTotalCash(totalCash => totalCash + transaction.amount);
-      setBudgets(budgets =>
-        budgets.map(budget =>
-          budget.id === transaction.budget_id
-            ? { ...budget, extra: budget.extra + transaction.amount }
-            : budget
-        )
-      );
-    });
-  }, []);
+    return budgetsMeta;
+  }, [budgets, transactions]);
+
+  const estimateExpenses = useMemo(() => {
+    let estimateExpenses = 0;
+
+    for (const budget of budgets) {
+      if (budget.frequency === 'D') {
+        estimateExpenses -= getDaysInMonth(new Date()) * budget.allocated;
+      } else {
+        estimateExpenses -= budget.allocated;
+      }
+    }
+    return estimateExpenses;
+  }, [budgets]);
+
+  const totalExpenses = useMemo(() => {
+    let totalExpenses = 0;
+
+    const transactionsThisMonth = transactions.filter(transaction =>
+      isThisMonth(new Date(transaction.createdAt))
+    );
+
+    for (const transaction of transactionsThisMonth) {
+      totalExpenses -= transaction.amount;
+    }
+
+    return totalExpenses;
+  }, [transactions]);
 
   return (
-    <DBContext.Provider value={{ db, budgets, cash, totalCash, totalExpenses }}>
+    <DBContext.Provider
+      value={{
+        db,
+        budgets,
+        cash,
+        transactions,
+        budgetsMeta,
+        estimateExpenses,
+        totalExpenses,
+      }}
+    >
       {children}
     </DBContext.Provider>
   );
