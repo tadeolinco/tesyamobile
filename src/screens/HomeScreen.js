@@ -17,11 +17,11 @@ function HomeScreen() {
     <View>
       {[...budgets]
         .sort((a, b) => {
-          if (a.frequency === b.frequency) return 0;
+          if (a.frequency === b.frequency)
+            return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
           if (a.frequency === 'D') return -1;
           if (b.frequency === 'D') return 1;
-
-          return a.name > b.name ? -1 : a.name < b.name ? 1 : 0;
+          return 0;
         })
         .map(budget => (
           <BudgetItem key={budget.id} {...budget} {...budgetsMeta[budget.id]} />

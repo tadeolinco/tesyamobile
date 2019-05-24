@@ -46,6 +46,7 @@ export function DBProvider({ children }) {
 
     Budget.onChange(({ event, changed }) => {
       const budget = changed ? changed[0] : {};
+
       if (event === 'insert') {
         setBudgets(budgets => [...budgets, budget]);
       } else if (event === 'update') {
@@ -53,7 +54,7 @@ export function DBProvider({ children }) {
           budgets.map(b => (b.id === budget.id ? budget : b))
         );
       } else if (event === 'remove') {
-        setBudgets(budget => budgets.filter(b => b.id !== budget.id));
+        setBudgets(budgets => budgets.filter(b => b.id !== budget.id));
       }
     });
 
