@@ -44,10 +44,10 @@ function Drawer({ position, children }) {
               activeOpacity={0.95}
               style={[styles.drawerButton, { backgroundColor: '#7ace68' }]}
               onPress={() => {
-                handleChangePage('/cash');
+                handleChangePage('/income');
               }}
             >
-              <Text style={[styles.drawerButtonText]}>CASH</Text>
+              <Text style={[styles.drawerButtonText]}>INCOME</Text>
             </TouchableOpacity>
             <TouchableOpacity
               activeOpacity={0.95}

@@ -1,4 +1,4 @@
-function dropDatabase({ Budget, Transaction, Cash }) {
+function dropDatabase({ Budget, Transaction, Income }) {
   Budget.onLoaded(() => {
     Budget.data().forEach(({ id }) => {
       Budget.remove(id);
@@ -9,9 +9,9 @@ function dropDatabase({ Budget, Transaction, Cash }) {
       Transaction.remove(id);
     });
   });
-  Cash.onLoaded(() => {
-    Cash.data().forEach(({ id }) => {
-      Cash.remove(id);
+  Income.onLoaded(() => {
+    Income.data().forEach(({ id }) => {
+      Income.remove(id);
     });
   });
 }

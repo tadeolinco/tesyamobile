@@ -5,32 +5,20 @@ import { RouterContext } from '../components/Router';
 import DBContext from '../context/DBContext';
 import useForm from '../hooks/useForm';
 
-function CashScreen() {
-  const { db, cash } = useContext(DBContext);
+function IncomeScreen() {
+  const { db, income } = useContext(DBContext);
   const { changePage } = useContext(RouterContext);
   const [values, onChange] = useForm({
-    amount: String(cash.amount),
+    amount: String(income.amount),
     addAmount: '',
   });
 
-  function updateCash() {
+  function updateIncome() {
     try {
-      db.Cash.update(cash.id, {
+      db.Income.update(income.id, {
         amount: +values.amount,
       });
-      ToastAndroid.show('Cash updated', ToastAndroid.SHORT);
-      changePage('/');
-    } catch (err) {
-      ToastAndroid.show(err.message, ToastAndroid.SHORT);
-    }
-  }
-
-  function addToCash() {
-    try {
-      db.Cash.update(cash.id, {
-        amount: cash.amount + +values.addAmount,
-      });
-      ToastAndroid.show('Cash updated', ToastAndroid.SHORT);
+      ToastAndroid.show('Income updated', ToastAndroid.SHORT);
       changePage('/');
     } catch (err) {
       ToastAndroid.show(err.message, ToastAndroid.SHORT);
@@ -42,26 +30,14 @@ function CashScreen() {
       <View style={[styles.formItemsContainer]}>
         <FormItem
           type={FORM_ITEM_TYPE.NUMBER}
-          label="Cash"
+          label="Income"
           value={values.amount}
           onChange={onChange.amount}
         />
       </View>
 
       <View style={[styles.buttonContainer]}>
-        <Button title="UPDATE CASH" onPress={updateCash} />
-      </View>
-      <View style={[styles.formItemsContainer]}>
-        <FormItem
-          type={FORM_ITEM_TYPE.NUMBER}
-          label="Add to Cash"
-          value={values.addAmount}
-          onChange={onChange.addAmount}
-        />
-      </View>
-
-      <View style={[styles.buttonContainer]}>
-        <Button title="ADD TO CASH" onPress={addToCash} />
+        <Button title="UPDATE" onPress={updateIncome} />
       </View>
     </View>
   );
@@ -80,4 +56,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CashScreen;
+export default IncomeScreen;

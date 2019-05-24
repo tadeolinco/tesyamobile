@@ -7,8 +7,8 @@ import { DBProvider } from './context/DBContext';
 import AddBudgetScreen from './screens/AddBudgetScreen';
 import AddTransactionScreen from './screens/AddTransactionScreen';
 import BudgetScreen from './screens/BudgetScreen';
-import CashScreen from './screens/CashScreen';
 import HomeScreen from './screens/HomeScreen';
+import IncomeScreen from './screens/IncomeScreen';
 import TransactionsScreen from './screens/TransactionsScreen';
 
 function App() {
@@ -26,7 +26,7 @@ function App() {
                 component={AddTransactionScreen}
               />
               <Route page={'/transactions'} component={TransactionsScreen} />
-              <Route page={'/cash'} component={CashScreen} />
+              <Route page={'/income'} component={IncomeScreen} />
             </View>
           </Drawer>
         </Drawer>

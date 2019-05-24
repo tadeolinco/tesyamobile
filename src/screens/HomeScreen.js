@@ -7,10 +7,10 @@ import DBContext from '../context/DBContext';
 function HomeScreen() {
   const {
     budgets,
-    cash,
     budgetsMeta,
     estimateExpenses,
     totalExpenses,
+    income,
   } = useContext(DBContext);
 
   return (
@@ -27,15 +27,18 @@ function HomeScreen() {
           <BudgetItem key={budget.id} {...budget} {...budgetsMeta[budget.id]} />
         ))}
 
-      {cash && (
+      <Statistic
+        style={{ marginTop: !budgets.length ? 0 : 20 }}
+        label="Monthly Expenses:"
+        value={estimateExpenses}
+      />
+      <Statistic label="Current Expenses:" value={totalExpenses} />
+      {income && (
         <Statistic
-          label="Total Cash:"
-          value={cash.amount}
-          style={{ marginTop: !budgets.length ? 0 : 20 }}
+          label="Monthly Savings:"
+          value={income.amount + estimateExpenses}
         />
       )}
-      <Statistic label="Estimate Expenses:" value={estimateExpenses} />
-      <Statistic label={`Total Expenses:`} value={totalExpenses} />
     </View>
   );
 }

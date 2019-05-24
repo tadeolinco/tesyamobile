@@ -1,4 +1,4 @@
-package com.tesyamobile;
+package com.tesya;
 
 import android.app.Application;
 

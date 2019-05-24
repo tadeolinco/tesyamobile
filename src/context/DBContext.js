@@ -7,7 +7,7 @@ import {
 import React, { useEffect, useMemo, useState } from 'react';
 import Vasern from 'vasern';
 import BudgetModel from '../models/Budget';
-import CashModel from '../models/Cash';
+import IncomeModel from '../models/Income';
 import TransactionModel from '../models/Transaction';
 
 export const DBContext = React.createContext(null);
@@ -16,29 +16,29 @@ export function DBProvider({ children }) {
   const [db, setDB] = useState(null);
 
   const [budgets, setBudgets] = useState([]);
-  const [cash, setCash] = useState(null);
+  const [income, setIncome] = useState(null);
   const [transactions, setTransactions] = useState([]);
 
   useEffect(() => {
     const vasern = new Vasern({
-      schemas: [BudgetModel, CashModel, TransactionModel],
+      schemas: [BudgetModel, IncomeModel, TransactionModel],
       version: 3,
     });
 
-    const { Budget, Transaction, Cash } = vasern;
+    const { Budget, Transaction, Income } = vasern;
 
     Budget.onLoaded(() => {
       Transaction.onLoaded(() => {
-        Cash.onLoaded(() => {
+        Income.onLoaded(() => {
           setBudgets(Budget.data());
           setTransactions(Transaction.data());
-          let dbCash = Cash.data()[0];
-          if (!dbCash) {
-            dbCash = Cash.insert({
+          let dbIncome = Income.data()[0];
+          if (!dbIncome) {
+            dbIncome = Income.insert({
               amount: 0,
             })[0];
           }
-          setCash(dbCash);
+          setIncome(dbIncome);
           setDB(vasern);
         });
       });
@@ -73,10 +73,10 @@ export function DBProvider({ children }) {
       }
     });
 
-    Cash.onChange(({ event, changed }) => {
-      const cash = changed ? changed[0] : {};
+    Income.onChange(({ event, changed }) => {
+      const income = changed ? changed[0] : {};
       if (event === 'update') {
-        setCash(cash);
+        setIncome(income);
       }
     });
   }, []);
@@ -140,7 +140,7 @@ export function DBProvider({ children }) {
       value={{
         db,
         budgets,
-        cash,
+        income,
         transactions,
         budgetsMeta,
         estimateExpenses,
