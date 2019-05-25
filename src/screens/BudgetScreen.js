@@ -14,6 +14,7 @@ function BudgetScreen() {
     name: budget.name,
     allocated: String(budget.allocated),
     frequency: budget.frequency,
+    createdAt: new Date(budget.createdAt),
   });
 
   function updateBudget() {
@@ -21,6 +22,7 @@ function BudgetScreen() {
       db.Budget.update(budget.id, {
         ...values,
         allocated: +values.allocated,
+        createdAt: new Date(values.createdAt),
       });
       ToastAndroid.show('Budget updated', ToastAndroid.SHORT);
       changePage('/');
@@ -69,6 +71,12 @@ function BudgetScreen() {
               value: 'M',
             },
           ]}
+        />
+        <FormItem
+          label="Start Date:"
+          type={FORM_ITEM_TYPE.DATE}
+          value={values.createdAt}
+          onChange={onChange.createdAt}
         />
       </View>
 

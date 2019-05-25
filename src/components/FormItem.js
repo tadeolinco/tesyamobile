@@ -1,11 +1,21 @@
+import { format } from 'date-fns';
 import React, { forwardRef } from 'react';
-import { Picker, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  DatePickerAndroid,
+  Picker,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { STYLES } from '../global-styles';
 
 export const FORM_ITEM_TYPE = {
   TEXT: 'TEXT',
   NUMBER: 'NUMBER',
   PICKER: 'PICKER',
+  DATE: 'DATE',
 };
 
 function FormItem(
@@ -36,6 +46,23 @@ function FormItem(
             ))}
           </Picker>
         </View>
+      ) : type === FORM_ITEM_TYPE.DATE ? (
+        <TouchableOpacity
+          style={[STYLES.INPUT, { padding: 10 }]}
+          onPress={async () => {
+            const { action, month, year, day } = await DatePickerAndroid.open({
+              date: new Date(value),
+            });
+
+            if (action === 'dateSetAction') {
+              onChange(new Date(year, month, day).getTime());
+            }
+          }}
+        >
+          <Text style={[STYLES.TEXT]}>
+            {format(new Date(value), 'MMM DD, YYYY')}
+          </Text>
+        </TouchableOpacity>
       ) : (
         <TextInput
           keyboardType={

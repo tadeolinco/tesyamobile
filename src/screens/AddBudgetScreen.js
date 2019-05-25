@@ -12,15 +12,16 @@ function AddBudgetScreen() {
     name: '',
     allocated: '',
     frequency: 'D',
+    createdAt: new Date(),
   });
 
   function addBudget() {
     try {
       db.Budget.insert({
         ...values,
+        createdAt: new Date(values.createdAt),
         allocated: +values.allocated,
         transactions: [],
-        createdAt: new Date(),
       });
       ToastAndroid.show('Budget created', ToastAndroid.SHORT);
       changePage('/');
@@ -60,6 +61,12 @@ function AddBudgetScreen() {
               value: 'M',
             },
           ]}
+        />
+        <FormItem
+          type={FORM_ITEM_TYPE.DATE}
+          label="Start Date:"
+          value={values.createdAt}
+          onChange={onChange.createdAt}
         />
       </View>
 

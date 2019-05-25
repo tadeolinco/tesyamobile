@@ -81,6 +81,7 @@ export function DBProvider({ children }) {
     });
   }, []);
 
+  const now = new Date();
   const budgetsMeta = useMemo(() => {
     const budgetsMeta = {};
 
@@ -106,7 +107,7 @@ export function DBProvider({ children }) {
     }
 
     return budgetsMeta;
-  }, [budgets, transactions]);
+  }, [budgets, transactions, now.getDate(), now.getMonth(), now.getFullYear()]);
 
   const estimateExpenses = useMemo(() => {
     let estimateExpenses = 0;

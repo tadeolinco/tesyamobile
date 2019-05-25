@@ -4,6 +4,4 @@ import App from './src/App';
 
 YellowBox.ignoreWarnings(['Remote debugger']);
 
-console.log(appName);
-
 AppRegistry.registerComponent(appName, () => App);
