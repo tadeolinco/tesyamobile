@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { View } from 'react-native';
+import { ScrollView } from 'react-native';
 import BudgetItem from '../components/BudgetItem';
 import Statistic from '../components/Statistic';
 import DBContext from '../context/DBContext';
@@ -14,7 +14,7 @@ function HomeScreen() {
   } = useContext(DBContext);
 
   return (
-    <View>
+    <ScrollView>
       {[...budgets]
         .sort((a, b) => {
           if (a.frequency === b.frequency)
@@ -39,7 +39,7 @@ function HomeScreen() {
           value={income.amount + estimateExpenses}
         />
       )}
-    </View>
+    </ScrollView>
   );
 }
 

@@ -54,6 +54,14 @@ export function DBProvider({ children }) {
           budgets.map(b => (b.id === budget.id ? budget : b))
         );
       } else if (event === 'remove') {
+        let dbTransactions = Transaction.filter({ budget: budget.id }).data();
+        for (const transaction of dbTransactions) {
+          Transaction.remove(transaction.id);
+        }
+        dbTransactions = Transaction.filter({ budget_id: budget.id }).data();
+        for (const transaction of dbTransactions) {
+          Transaction.remove(transaction.id);
+        }
         setBudgets(budgets => budgets.filter(b => b.id !== budget.id));
       }
     });
@@ -83,7 +91,7 @@ export function DBProvider({ children }) {
 
   const now = new Date();
   const budgetsMeta = useMemo(() => {
-    const budgetsMeta = {};
+    const newBudgetsMeta = {};
 
     for (const budget of budgets) {
       const multiplier =
@@ -92,21 +100,22 @@ export function DBProvider({ children }) {
         (multiplier(new Date(), new Date(budget.createdAt)) + 1) *
         budget.allocated;
 
-      budgetsMeta[budget.id] = {
+      newBudgetsMeta[budget.id] = {
         transactions: [],
         budget,
         extra,
       };
     }
-
     for (const transaction of transactions) {
       const id = transaction.budget_id || transaction.budget;
 
-      budgetsMeta[id].transactions.push(transaction);
-      budgetsMeta[id].extra -= transaction.amount;
+      if (newBudgetsMeta[id]) {
+        newBudgetsMeta[id].transactions.push(transaction);
+        newBudgetsMeta[id].extra -= transaction.amount;
+      }
     }
 
-    return budgetsMeta;
+    return newBudgetsMeta;
   }, [budgets, transactions, now.getDate(), now.getMonth(), now.getFullYear()]);
 
   const estimateExpenses = useMemo(() => {

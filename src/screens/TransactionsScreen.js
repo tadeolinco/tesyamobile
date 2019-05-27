@@ -2,6 +2,7 @@ import { format } from 'date-fns';
 import React, { Fragment, useContext, useMemo } from 'react';
 import {
   Alert,
+  ScrollView,
   StyleSheet,
   Text,
   ToastAndroid,
@@ -52,7 +53,7 @@ function TransactionsScreen() {
     Alert.alert(
       'Delete this transaction?',
       `Budget: ${
-        budgetsMeta[transaction.budget_id].budget.name
+        budgetsMeta[transaction.budget_id || transaction.budget].budget.name
       }\nDescription: ${transaction.description || '—'}\nAmount: ${
         transaction.amount
       }`,
@@ -73,8 +74,10 @@ function TransactionsScreen() {
   }
 
   return (
-    <View
-      style={[Object.keys(transactionsMap).length === 0 && styles.container]}
+    <ScrollView
+      contentContainerStyle={[
+        Object.keys(transactionsMap).length === 0 && styles.container,
+      ]}
     >
       {Object.keys(transactionsMap).length === 0 && (
         <Text style={[STYLES.TEXT]}>
@@ -95,6 +98,7 @@ function TransactionsScreen() {
       )}
       {Object.keys(transactionsMap)
         .sort()
+        .reverse()
         .map(key => {
           return (
             <Fragment key={key}>
@@ -114,7 +118,9 @@ function TransactionsScreen() {
               {[...transactionsMap[key].transactions]
                 .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
                 .map(transaction => {
-                  const budget = budgetsMeta[transaction.budget_id].budget;
+                  const budget =
+                    budgetsMeta[transaction.budget_id || transaction.budget]
+                      .budget;
 
                   return (
                     <TouchableOpacity
@@ -151,7 +157,7 @@ function TransactionsScreen() {
             </Fragment>
           );
         })}
-    </View>
+    </ScrollView>
   );
 }
 

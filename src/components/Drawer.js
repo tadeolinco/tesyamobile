@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import packageJson from '../../package.json';
 import { STYLES } from '../global-styles';
 import { RouterContext } from './Router';
 
@@ -77,6 +78,16 @@ function Drawer({ position, children }) {
             >
               <Text style={[styles.drawerButtonText]}>DASHBOARD</Text>
             </TouchableOpacity>
+            <Text
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                right: 0,
+                color: 'white',
+              }}
+            >
+              v{packageJson.version}
+            </Text>
           </View>
         );
       }}
